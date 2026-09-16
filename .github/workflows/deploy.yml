@@ -1,0 +1,90 @@
+name: Deploy Documentation Portal
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # Allows external repos (like obgs-hs/type-level) to trigger a doc rebuild on push
+  repository_dispatch:
+    types: [package-updated]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy-portal:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout portal repository
+        uses: actions/checkout@v4
+
+      - name: Checkout obgs-hs/type-level
+        uses: actions/checkout@v4
+        with:
+          repository: obgs-hs/type-level
+          path: packages/type-level
+
+      # Note for future packages:
+      # As new package repositories are published under obgs-hs, add their checkouts here:
+      #
+      # - name: Checkout obgs-hs/data
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: obgs-hs/data
+      #     path: packages/data
+
+      - name: Setup Haskell (GHC 9.14.1 & Cabal 3.16)
+        uses: haskell-actions/setup@v2
+        id: setup-haskell
+        with:
+          ghc-version: "9.14.1"
+          cabal-version: "3.16.0.0"
+
+      - name: Cache cabal store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.setup-haskell.outputs.cabal-store }}
+          key: ${{ runner.os }}-ghc-9.14.1-cabal-${{ hashFiles('packages/**/*.cabal') }}
+          restore-keys: |
+            ${{ runner.os }}-ghc-9.14.1-cabal-
+
+      - name: Build Haddocks
+        run: |
+          cabal update
+          mkdir -p public/type-level
+
+          # Build obgs-type-level documentation
+          cd packages/type-level
+          cabal haddock \
+            --enable-documentation \
+            --haddock-hyperlink-source \
+            --haddock-quickjump \
+            --haddock-html-location='https://hackage.haskell.org/package/$pkg-$version/docs'
+          cd ../..
+
+          # Copy generated documentation to the public portal directory
+          cp -R packages/type-level/dist-newstyle/build/*/ghc-*/obgs-type-level-*/doc/html/obgs-type-level/* public/type-level/
+
+      - name: Assemble Portal Assets
+        run: |
+          cp index.html public/index.html
+          cp -R assets public/assets
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

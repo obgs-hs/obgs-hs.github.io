@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OBGS — Open Board Game Sheets</title>
+  <link rel="icon" type="image/svg+xml" href="assets/obgs-mark-light.svg">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #1f2328;
+      --muted: #656d76;
+      --card-bg: #f6f8fa;
+      --card-border: #d0d7de;
+      --link: #0969da;
+      --link-hover: #0550ae;
+      --badge-release-bg: #1a7f37;
+      --badge-release-text: #ffffff;
+      --badge-upcoming-bg: #eaeef2;
+      --badge-upcoming-text: #57606a;
+      --badge-upcoming-border: #d0d7de;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117;
+        --text: #e6edf3;
+        --muted: #848d97;
+        --card-bg: #161b22;
+        --card-border: #30363d;
+        --link: #4493f8;
+        --link-hover: #79c0ff;
+        --badge-release-bg: #238636;
+        --badge-release-text: #ffffff;
+        --badge-upcoming-bg: #21262d;
+        --badge-upcoming-text: #8b949e;
+        --badge-upcoming-border: #30363d;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 860px;
+      margin: 48px auto;
+      padding: 0 24px;
+      line-height: 1.6;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 28px;
+      margin-bottom: 36px;
+    }
+
+    .logo-container {
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .logo {
+      width: 56px;
+      height: 56px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 8px 0 0 0;
+      font-size: 1.05rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card.active:hover {
+      border-color: var(--link);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .card.upcoming {
+      opacity: 0.78;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    .card-title a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    .card-title a:hover {
+      text-decoration: underline;
+      color: var(--link-hover);
+    }
+
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 12px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .badge-release {
+      background: var(--badge-release-bg);
+      color: var(--badge-release-text);
+    }
+
+    .badge-upcoming {
+      background: var(--badge-upcoming-bg);
+      color: var(--badge-upcoming-text);
+      border: 1px solid var(--badge-upcoming-border);
+    }
+
+    p {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .card-actions {
+      margin-top: 14px;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    .action-link:hover {
+      text-decoration: underline;
+      color: var(--link-hover);
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.9em;
+      background: rgba(175, 184, 193, 0.2);
+      padding: 0.15em 0.35em;
+      border-radius: 4px;
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+    footer a:hover {
+      color: var(--link);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="assets/obgs-mark-dark.svg">
+        <img class="logo" src="assets/obgs-mark-light.svg" alt="OBGS Logo">
+      </picture>
+    </div>
+    <div>
+      <h1>OBGS</h1>
+      <p class="subtitle"><strong>Open Board Game Sheets</strong> — A suite of Haskell packages for declaratively describing board game score sheets and evaluating their rules with static type safety.</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- Active Package: obgs-type-level -->
+    <div class="card active">
+      <div class="card-header">
+        <h2 class="card-title">
+          <a href="./type-level/index.html">obgs-type-level</a>
+        </h2>
+        <span class="badge badge-release">v0.1.0.0</span>
+      </div>
+      <p>Type families and first-class families for higher-order type-level computations, promoted numerical arithmetic with overflow semantics, finite inhabitants, and structured compile-time error diagnostics.</p>
+      <div class="card-actions">
+        <a class="action-link" href="./type-level/index.html">
+          Browse Haddock Documentation &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Upcoming Package: obgs-data -->
+    <div class="card upcoming">
+      <div class="card-header">
+        <h2 class="card-title">obgs-data</h2>
+        <span class="badge badge-upcoming">Upcoming</span>
+      </div>
+      <p>Data structures: <code>HList</code>, <code>HVector</code>, <code>Range</code>, <code>RangeSet</code>, <code>Subset</code>, and promoted storage primitives.</p>
+    </div>
+
+    <!-- Upcoming Package: obgs-control -->
+    <div class="card upcoming">
+      <div class="card-header">
+        <h2 class="card-title">obgs-control</h2>
+        <span class="badge badge-upcoming">Upcoming</span>
+      </div>
+      <p>Domain abstractions: <code>Matcher</code>, <code>Formula</code>, <code>Indexed</code>, and effect helpers.</p>
+    </div>
+
+    <!-- Upcoming Package: obgs-form -->
+    <div class="card upcoming">
+      <div class="card-header">
+        <h2 class="card-title">obgs-form</h2>
+        <span class="badge badge-upcoming">Upcoming</span>
+      </div>
+      <p>The declarative form language: entities, selectors, formulas, option sets, and rule evaluation.</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Maintained by the <a href="https://github.com/obgs-hs" target="_blank" rel="noopener noreferrer">obgs-hs</a> project.</p>
+  </footer>
+</body>
+</html>

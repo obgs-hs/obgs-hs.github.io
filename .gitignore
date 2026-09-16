@@ -1,0 +1,13 @@
+# Artifacts and build outputs
+public/
+dist-newstyle/
+packages/
+.ghc.environment.*
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
